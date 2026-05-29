@@ -13,11 +13,15 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      with:
-        submodules: recursive  # Автоматически подтягивает GTest из подмодулей
+      # Убрали submodules: recursive, чтобы не падать на призраках старых лабораторных
+
+    - name: Initialize GTest Submodule
+      # Явно инициализируем и скачиваем ТОЛЬКО нужный нам Google Test
+      run: |
+        git submodule init third-party/gtest
+        git submodule update third-party/gtest
 
     - name: Configure CMake
-      # Пробрасываем флаг, отключающий строгие варнинги для старого GTest
       run: cmake -H. -B_build -DBUILD_TESTS=ON -DCMAKE_CXX_FLAGS="-Wno-error=maybe-uninitialized"
 
     - name: Build Project
