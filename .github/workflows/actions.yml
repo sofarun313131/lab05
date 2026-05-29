@@ -1,6 +1,10 @@
-name: CMake Testing
+name: CMake and GTest CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
   build_and_test:
@@ -10,13 +14,14 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        submodules: recursive  # ОБЯЗАТЕЛЬНО скачиваем подмодуль GTest
+        submodules: recursive  # Автоматически подтягивает GTest из подмодулей
 
-    - name: Configure CMake with Tests
-      run: cmake -H. -B_build -DBUILD_TESTS=ON -DCMAKE_INSTALL_PREFIX=_install
+    - name: Configure CMake
+      # Пробрасываем флаг, отключающий строгие варнинги для старого GTest
+      run: cmake -H. -B_build -DBUILD_TESTS=ON -DCMAKE_CXX_FLAGS="-Wno-error=maybe-uninitialized"
 
-    - name: Build project and tests
+    - name: Build Project
       run: cmake --build _build
 
-    - name: Run Unit Tests
+    - name: Run Tests
       run: cmake --build _build --target test -- ARGS=--verbose
